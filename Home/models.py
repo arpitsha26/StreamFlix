@@ -8,9 +8,12 @@ from .choices import AGE_CHOICES
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     is_verified = models.BooleanField(default=False)
+    phone_number = models.CharField(max_length=15)
+    first_name = models.CharField(max_length=30, blank=False, null=False)
+    last_name = models.CharField(max_length=30, blank=True, null=False)
     profiles=models.ManyToManyField('Profile')
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']
+    REQUIRED_FIELDS = ['username',]
 
     def __str__(self):
         return self.email
@@ -48,7 +51,7 @@ class Movie(Basemodel):
     description=models.TextField()
     release_date=models.DateField()
     categories=models.ManyToManyField(Category,related_name="movies")
-    poster=models.models.ImageField(upload_to='movie_posters/',  blank=True,null=True)
+    poster=models.ImageField(upload_to='movie_posters/',  blank=True,null=True)
     videos=models.ManyToManyField('Video')
     duration = models.PositiveIntegerField(help_text="Duration in minutes")
     is_featured = models.BooleanField(default=False)
