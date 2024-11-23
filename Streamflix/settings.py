@@ -77,7 +77,7 @@ AUTH_USER_MODEL = 'Home.CustomUser'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    "default": dj_database_url.parse(os.getenv("DATABASE_URL"))
+    "default": dj_database_url.parse(os.getenv("DATABASE_URL"), conn_max_age=600, ssl_require=True)
 }
 
 # Password validation

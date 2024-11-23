@@ -1,4 +1,4 @@
-from .models import CustomUser
+from .models import CustomUser, Profile, Category, Video, Movie, UserMovieList, Review, WatchHistory
 from rest_framework import serializers
 
 
@@ -32,3 +32,66 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         return user
+
+class ProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Profile
+        fields = ['id', 'name', 'age_limit', 'uuid']
+
+
+class CategorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Category
+        fields = ['id', 'category_name', 'slug', 'created_at', 'updated_at']
+
+
+class VideoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Video
+        fields = ['id', 'title', 'file']
+
+class MovieSerializer(serializers.ModelSerializer):
+    categories = CategorySerializer(many=True, read_only=True)
+    videos = VideoSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Movie
+        fields = [
+            'id', 'title', 'description', 'release_date',
+            'categories', 'poster', 'videos', 'duration',
+            'is_featured', 'created_at', 'updated_at'
+        ]
+
+
+class MovieCreateUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = [
+            'title', 'description', 'release_date', 'categories',
+            'poster', 'videos', 'duration', 'is_featured'
+        ]
+
+
+class UserMovieListSerializer(serializers.ModelSerializer):
+    movie = MovieSerializer(read_only=True)
+    
+    class Meta:
+        model = UserMovieList
+        fields = ['id', 'user', 'movie', 'added_on']
+
+
+class WatchHistorySerializer(serializers.ModelSerializer):
+    movie = MovieSerializer(read_only=True)
+    
+    class Meta:
+        model = WatchHistory
+        fields = ['id', 'user', 'movie', 'watched_at', 'progress']
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(queryset=CustomUser.objects.all())
+    movie = serializers.PrimaryKeyRelatedField(queryset=Movie.objects.all())
+    
+    class Meta:
+        model = Review
+        fields = ['id', 'user', 'movie', 'rating', 'comment', 'created_at']

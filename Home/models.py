@@ -28,13 +28,14 @@ class Profile(models.Model):
         return self.name +" "+self.age_limit
     
 class Basemodel(models.Model):
-    uuid=models.UUIDField(default=uuid.uuid4, primary_key=True,editable=False)
+    id = models.AutoField(primary_key=True)
     created_at=models.DateField(auto_now_add=True)
     updated_at=models.DateField(auto_now_add=True)
     class Meta:
         abstract=True 
 
 class Category(Basemodel):
+    id = models.AutoField(primary_key=True)
     category_name=models.CharField(max_length=100)
     slug = models.SlugField(max_length=255, unique=True, blank=True)
     
@@ -60,10 +61,12 @@ class Movie(Basemodel):
         return self.title
 
 class Video(models.Model):
+    id = models.AutoField(primary_key=True)
     title:str = models.CharField(max_length=225,blank=True,null=True)
     file=models.FileField(upload_to='movies')
     
 class UserMovieList(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="movie_lists")
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="user_lists")
     added_on = models.DateTimeField(auto_now_add=True)
@@ -72,6 +75,7 @@ class UserMovieList(models.Model):
         return f"{self.user.email} - {self.movie.title}"
 
 class WatchHistory(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="watch_history")
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="watch_history")
     watched_at = models.DateTimeField(auto_now_add=True)
@@ -81,6 +85,7 @@ class WatchHistory(models.Model):
         return f"{self.user.email} watched {self.movie.title}"
 
 class Review(models.Model):
+    id = models.AutoField(primary_key=True)
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="reviews")
     movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name="reviews")
     rating = models.PositiveIntegerField(default=1, help_text="Rating out of 5")
