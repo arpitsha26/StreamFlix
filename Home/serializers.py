@@ -59,7 +59,7 @@ class MovieSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'title', 'description', 'release_date',
             'categories', 'poster', 'videos', 'duration',
-            'is_featured', 'created_at', 'updated_at'
+            'is_featured', 
         ]
 
 

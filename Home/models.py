@@ -45,7 +45,7 @@ class Category(Basemodel):
         super().save(*args, **kwargs)
 
     def __str__(self):
-        return self.name
+        return self.category_name
     
 class Movie(Basemodel):
     title=models.CharField(max_length=255)

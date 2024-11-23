@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import IntegrityError
-from .serializers import RegisterSerializer
-from .models import CustomUser
+from .serializers import RegisterSerializer, MovieSerializer, MovieCreateUpdateSerializer
+from .models import CustomUser, Movie
 from django.contrib.auth.hashers import check_password
 from django.conf import settings
 import datetime
@@ -55,3 +55,20 @@ class login(APIView):
         except Exception as e:
             return HttpResponse('Error occured')
 
+class movielist(APIView):
+    
+    def get(self, request):
+        movies = Movie.objects.all().order_by('-release_date')
+        serializer = MovieSerializer(movies, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = MovieCreateUpdateSerializer(data=request.data)
+        if serializer.is_valid():
+            movie = serializer.save()
+            if 'categories' in request.data:
+                movie.categories.set(request.data['categories'])
+            if 'videos' in request.data:
+                movie.videos.set(request.data['videos'])
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
