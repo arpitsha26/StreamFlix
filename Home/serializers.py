@@ -42,7 +42,7 @@ class ProfileSerializer(serializers.ModelSerializer):
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ['id', 'category_name', 'slug', 'created_at', 'updated_at']
+        fields = ['id', 'category_name', 'slug', ]
 
 
 class VideoSerializer(serializers.ModelSerializer):
