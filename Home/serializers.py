@@ -1,4 +1,4 @@
-from .models import CustomUser, Profile, Category, Video, Movie, UserMovieList, Review, WatchHistory, Anime, Season, Episode, Series, AnimeEpisode
+from .models import CustomUser, Profile, Category, Video, Movie, UserMovieList, Review, WatchHistory, Genre
 from rest_framework import serializers
 
 
@@ -49,16 +49,22 @@ class VideoSerializer(serializers.ModelSerializer):
     class Meta:
         model = Video
         fields = ['id', 'title', 'file']
+        
+class GenreSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Genre
+        fields = ['id', 'name']
 
 class MovieSerializer(serializers.ModelSerializer):
     categories = CategorySerializer(many=True, read_only=True)
     videos = VideoSerializer(many=True, read_only=True)
+    genres = GenreSerializer(many=True, read_only=True)
 
     class Meta:
         model = Movie
         fields = [
             'id', 'title', 'description', 'release_date',
-            'categories', 'poster', 'videos', 'duration',
+            'categories', 'poster','genres', 'videos', 'duration',
             'is_featured', 
         ]
 
@@ -67,28 +73,17 @@ class MovieCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = [
-            'title', 'description', 'release_date', 'categories',
+            'title', 'description', 'release_date', 'categories','genres',
             'poster', 'videos', 'duration', 'is_featured'
         ]
 
 
 class UserMovieListSerializer(serializers.ModelSerializer):
-    movie_title = serializers.ReadOnlyField(source="movie.title")  
-    series_title = serializers.ReadOnlyField(source="series.title")  
-    anime_title = serializers.ReadOnlyField(source="anime.title") 
-    user_email = serializers.ReadOnlyField(source="user.email")   
-
+    movie = MovieSerializer(read_only=True)
+    
     class Meta:
         model = UserMovieList
-        fields = ['id', 'user', 'user_email', 'movie', 'movie_title', 'series', 'series_title', 'anime', 'anime_title', 'added_on']
-    
-    def validate(self, attrs):
-
-        if not any([attrs.get('movie'), attrs.get('series'), attrs.get('anime')]):
-            raise serializers.ValidationError('At least one of movie, series, or anime must be provided.')
-        if sum([bool(attrs.get('movie')), bool(attrs.get('series')), bool(attrs.get('anime'))]) > 1:
-            raise serializers.ValidationError('Only one of movie, series, or anime can be added at a time.')
-        return attrs
+        fields = ['id', 'user', 'movie', 'added_on']
 
 
 class WatchHistorySerializer(serializers.ModelSerializer):
@@ -106,102 +101,3 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'user', 'movie', 'rating', 'comment', 'created_at']
-
-class EpisodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Episode
-        fields = ['id', 'title', 'duration', 'file', 'episode_number', 'created_at', 'updated_at']
-
-
-class SeasonSerializer(serializers.ModelSerializer):
-    episodes = EpisodeSerializer(many=True)
-
-    class Meta:
-        model = Season
-        fields = [
-            'id',
-            'title',
-            'season_number',
-            'episodes',
-            'poster',
-            'created_at',
-            'updated_at'
-        ]
-
-    def create(self, validated_data):
-        episodes_data = validated_data.pop('episodes', [])
-        season = Season.objects.create(**validated_data)
-        for episode_data in episodes_data:
-            Episode.objects.create(**episode_data, season=season)
-        return season
-
-
-class SeriesSerializer(serializers.ModelSerializer):
-    categories = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
-    seasons = SeasonSerializer(many=True)
-
-    class Meta:
-        model = Series
-        fields = [
-            'id', 
-            'title', 
-            'description', 
-            'release_date', 
-            'categories', 
-            'poster', 
-            'seasons', 
-            'is_featured',
-            'created_at', 
-            'updated_at'
-        ]
-
-    def create(self, validated_data):
-        seasons_data = validated_data.pop('seasons', [])
-        categories = validated_data.pop('categories', [])
-        series = Series.objects.create(**validated_data)
-        series.categories.set(categories)
-        
-        for season_data in seasons_data:
-            episodes_data = season_data.pop('episodes', [])
-            season = Season.objects.create(series=series, **season_data)
-            for episode_data in episodes_data:
-                Episode.objects.create(season=season, **episode_data)
-        
-        return series
-
-
-class AnimeEpisodeSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AnimeEpisode
-        fields = ['id', 'title', 'duration', 'file', 'episode_number', 'created_at', 'updated_at']
-
-
-class AnimeSerializer(serializers.ModelSerializer):
-    categories = serializers.PrimaryKeyRelatedField(queryset=Category.objects.all(), many=True)
-    episodes = AnimeEpisodeSerializer(many=True)
-
-    class Meta:
-        model = Anime
-        fields = [
-            'id', 
-            'title', 
-            'description', 
-            'release_date', 
-            'categories', 
-            'poster', 
-            'episodes', 
-            'is_featured',
-            'created_at', 
-            'updated_at'
-        ]
-
-    def create(self, validated_data):
-        episodes_data = validated_data.pop('episodes', [])
-        categories = validated_data.pop('categories', [])
-        anime = Anime.objects.create(**validated_data)
-        anime.categories.set(categories)
-        
-        for episode_data in episodes_data:
-            AnimeEpisode.objects.create(anime=anime, **episode_data)
-        
-        return anime
