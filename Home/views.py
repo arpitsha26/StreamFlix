@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.db import IntegrityError
-from .serializers import RegisterSerializer, MovieSerializer, MovieCreateUpdateSerializer, UserMovieListSerializer, ProfileSerializer
-from .models import CustomUser, Movie, UserMovieList, Profile
+from .serializers import RegisterSerializer, MovieSerializer, MovieCreateUpdateSerializer, UserMovieListSerializer, UserProfileSerializer
+from .models import CustomUser, Movie, UserMovieList
 from django.contrib.auth.hashers import check_password
 from django.conf import settings
 import datetime
@@ -130,3 +130,21 @@ class mylist(APIView):
 
         user_movie_list.delete()
         return Response({'detail': 'Movie removed from your list.'}, status=status.HTTP_204_NO_CONTENT)
+
+
+class UserProfile(APIView):
+    authentication_classes = [JWTAuthentication] 
+    permission_classes = [IsAuthenticated]  
+
+    def get(self, request):
+        user = request.user 
+        serializer = UserProfileSerializer(user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request):
+        user = request.user  
+        serializer = UserProfileSerializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

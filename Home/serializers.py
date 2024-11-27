@@ -1,4 +1,4 @@
-from .models import CustomUser, Profile, Category, Video, Movie, UserMovieList, Review, WatchHistory, Genre
+from .models import CustomUser,Category, Video, Movie, UserMovieList, Review, WatchHistory, Genre
 from rest_framework import serializers
 
 
@@ -32,12 +32,6 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data['password'],
         )
         return user
-
-class ProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Profile
-        fields = ['id', 'name', 'age_limit', 'uuid']
-
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -101,3 +95,9 @@ class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
         fields = ['id', 'user', 'movie', 'rating', 'comment', 'created_at']
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'email', 'first_name', 'last_name', 'phone_number',]
+        read_only_fields = ['id', 'email']

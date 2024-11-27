@@ -11,21 +11,13 @@ class CustomUser(AbstractUser):
     phone_number = models.CharField(max_length=15)
     first_name = models.CharField(max_length=30, blank=False, null=False)
     last_name = models.CharField(max_length=30, blank=True, null=False)
-    profiles=models.ManyToManyField('Profile')
+   
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username',]
 
     def __str__(self):
         return self.email
 
-class Profile(models.Model):
-    name=models.CharField(max_length=225)
-    age_limit=models.CharField(max_length=5,choices=AGE_CHOICES)
-    uuid=models.UUIDField(default=uuid.uuid4,unique=True)
-
-
-    def __str__(self):
-        return self.name +" "+self.age_limit
     
 class Basemodel(models.Model):
     id = models.AutoField(primary_key=True)
@@ -33,6 +25,7 @@ class Basemodel(models.Model):
     updated_at=models.DateField(auto_now_add=True)
     class Meta:
         abstract=True 
+        
 class Genre(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
