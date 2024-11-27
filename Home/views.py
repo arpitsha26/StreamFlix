@@ -22,6 +22,8 @@ from rest_framework.exceptions import AuthenticationFailed
 
 
 class signup(APIView):
+    permission_classes=[]
+    authentication_classes=[]
     def post(self, request, *args, **kwargs):
         try:
             serializer = RegisterSerializer(data=request.data)
@@ -61,6 +63,8 @@ class login(APIView):
 
 
 class movielist(APIView):
+    permission_classes=[]
+    authentication_classes=[]
     
     def get(self, request):
         movies = Movie.objects.all().order_by('-release_date')
